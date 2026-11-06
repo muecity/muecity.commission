@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="เครื่องคำนวณราคาเบื้องต้นสำหรับบริการเพลงคัฟเวอร์และเพลงแต่งของ Muecity">
+  <title>ลองคำนวณราคา | Muecity</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #282333;
+      --muted: #777183;
+      --paper: #f8f6fb;
+      --surface: #fff;
+      --line: #e5deee;
+      --primary: #684b8f;
+      --primary-dark: #392651;
+      --accent: #d6c2ee;
+      --soft-primary: #f1ecf7;
+      --warning: #76582a;
+      --warning-bg: #faf5e9;
+      font-family: "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); line-height: 1.75; }
+    a { color: inherit; }
+    .container { width: min(1000px, calc(100% - 36px)); margin-inline: auto; }
+    .topbar { position: sticky; top: 0; z-index: 10; color: #fff; background: var(--primary-dark); box-shadow: 0 6px 20px rgb(35 22 51 / 12%); }
+    .topbar-inner { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .brand { color: #fff; font-weight: 700; letter-spacing: .08em; text-decoration: none; }
+    .back-link { color: rgb(255 255 255 / 84%); font-size: .9rem; text-decoration: none; }
+    .back-link:hover { color: #fff; }
+    main { padding: 48px 0 72px; }
+    .intro { max-width: 740px; margin: 0 auto 28px; text-align: center; }
+    .section-reveal { opacity: 0; transform: translateY(14px); transition: opacity .42s ease, transform .42s ease; }
+    .section-reveal.is-visible { opacity: 1; transform: translateY(0); }
+    .eyebrow { margin: 0 0 8px; color: var(--primary); font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0 0 10px; color: var(--primary-dark); font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.3; }
+    .intro p:last-child { margin: 0; color: var(--muted); }
+    .service-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+    .service-option { position: relative; display: block; }
+    .service-option input { position: absolute; top: 18px; left: 18px; width: 20px; height: 20px; accent-color: var(--primary); }
+    .service-option span { display: block; height: 100%; padding: 17px 18px 17px 48px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); cursor: pointer; transition: border-color .22s ease, background-color .22s ease, box-shadow .22s ease; }
+    .service-option input:checked + span { border-color: var(--primary); background: var(--soft-primary); box-shadow: 0 0 0 2px rgb(104 75 143 / 12%); }
+    .service-option strong, .service-option small { display: block; }
+    .service-option small { color: var(--muted); line-height: 1.5; }
+    .calculator { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(280px, .88fr); align-items: start; gap: 20px; }
+    .panel { min-width: 0; padding: 24px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); box-shadow: 0 14px 38px rgb(57 38 81 / 7%); }
+    .clear-button {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      border: 1px solid var(--primary-dark);
+      border-radius: 6px;
+      color: #fff;
+      background: var(--primary-dark);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .clear-button:hover { transform: translateY(-1px); background: var(--primary); }
+    .clear-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    .demo-controls { margin: 0 0 20px; padding: 14px; border: 1px solid var(--line); border-radius: 7px; background: #fbf9fd; }
+    .demo-controls legend { padding: 0 6px; color: var(--primary-dark); font-weight: 700; }
+    .demo-controls p { margin: 0 0 10px; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+    .demo-buttons { display: flex; flex-wrap: wrap; gap: 9px; }
+    .demo-button { min-height: 42px; padding: 8px 13px; border: 1px solid var(--primary); border-radius: 6px; color: var(--primary-dark); background: #fff; font: inherit; font-size: .88rem; font-weight: 700; cursor: pointer; }
+    .demo-button[aria-pressed="true"] { color: #fff; background: var(--primary); box-shadow: 0 0 0 2px rgb(104 75 143 / 16%); }
+    .demo-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    .form-content { display: grid; gap: 19px; }
+    .service-form { transition: opacity .22s ease, transform .22s ease, display .22s allow-discrete; }
+    .service-form[hidden] { display: none; opacity: 0; transform: translateY(8px); }
+    @starting-style {
+      .service-form:not([hidden]) { opacity: 0; transform: translateY(8px); }
+    }
+    .field { display: grid; gap: 7px; }
+    .field label, .legend { font-weight: 700; }
+    .hint { margin: 0; color: var(--muted); font-size: .85rem; line-height: 1.55; }
+    .lyric-guidance {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fbf9fd;
+      font-size: .86rem;
+      line-height: 1.6;
+    }
+    .lyric-guidance-title { margin: 0; color: var(--primary-dark); font-weight: 700; }
+    .lyric-guidance ol { display: grid; gap: 6px; margin: 0; padding-left: 22px; }
+    .lyric-guidance .mandatory { color: var(--warning); font-weight: 700; }
+    textarea, input[type="number"], select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+    }
+    textarea { min-height: 150px; resize: vertical; }
+    textarea:focus, input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    .check-list, .radio-list { display: grid; gap: 10px; }
+    .choice { display: flex; align-items: flex-start; gap: 10px; }
+    .choice input { flex: 0 0 auto; width: 18px; height: 18px; margin: 5px 0 0; accent-color: var(--primary); }
+    .choice span { line-height: 1.55; }
+    .choice small { display: block; color: var(--muted); font-size: .82rem; }
+    .estimate-note { padding: 12px 14px; border-radius: 6px; color: var(--warning); background: var(--warning-bg); font-size: .86rem; line-height: 1.55; }
+    .result { position: sticky; top: 86px; background: var(--soft-primary); }
+    .result-label { margin: 0; color: var(--primary); font-size: .78rem; font-weight: 700; letter-spacing: .1em; }
+    .result h2 { margin: 4px 0; color: var(--primary-dark); font-size: 1.15rem; }
+    .total { margin: 12px 0 16px; color: var(--primary-dark); font-size: clamp(1.9rem, 4vw, 2.45rem); font-weight: 700; line-height: 1.25; }
+    .breakdown { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .breakdown li { display: flex; justify-content: space-between; gap: 12px; font-size: .9rem; }
+    .breakdown li span:last-child { flex: 0 0 auto; font-weight: 700; text-align: right; }
+    .breakdown .final { padding-top: 9px; border-top: 1px solid rgb(57 38 81 / 18%); font-weight: 700; }
+    .empty { margin: 0; color: var(--muted); font-size: .9rem; }
+    .result-note { margin: 14px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.55; }
+    footer { padding: 20px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; text-align: center; }
+    @media (max-width: 760px) {
+      main { padding-top: 34px; }
+      .calculator { grid-template-columns: 1fr; }
+      .result { position: static; }
+    }
+    @media (max-width: 520px) {
+      .container { width: min(100% - 26px, 1000px); }
+      .topbar-inner { min-height: 58px; }
+      .back-link { font-size: .82rem; }
+      .service-picker { grid-template-columns: 1fr; }
+      .panel { padding: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="muecity-theme.css" rel="stylesheet">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="muecity-services.html">MUECITY</a>
+      <a class="back-link" href="muecity-services.html">กลับหน้าบริการและอัตราค่าบริการ</a>
+    </div>
+  </header>
+  <main class="container">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Instant price estimate</p>
+      <h1 id="page-title">ลองคำนวณราคา</h1>
+      <p>เลือกบริการและกรอกรายละเอียดเพื่อดูราคาเบื้องต้น ไม่ต้องระบุชื่อหรือข้อมูลติดต่อ</p>
+    </section>
+
+    <fieldset class="service-picker" aria-label="เลือกประเภทบริการ">
+      <label class="service-option">
+        <input type="radio" name="service" value="cover" checked>
+        <span><strong>เพลงคัฟเวอร์</strong><small>คำนวณงานตัดต่อและมิกซ์เสียงร้อง พร้อมตัวเลือกบริการด้านดนตรี</small></span>
+      </label>
+      <label class="service-option">
+        <input type="radio" name="service" value="compose">
+        <span><strong>เพลงแต่ง</strong><small>เลือกบริการแต่งเนื้อเพลง ทำนอง ผลิตดนตรี และงานเสียงร้อง</small></span>
+      </label>
+    </fieldset>
+
+    <div class="calculator">
+      <section class="panel">
+        <button class="clear-button" id="clear-form" type="button">ล้างข้อมูล</button>
+        <form class="form-content" id="price-form">
+          <div class="service-form" id="cover-form">
+            <div class="form-content">
+              <div class="field">
+                <label for="cover-syllables">จำนวนคำ (หน่วย)</label>
+                <input id="cover-syllables" type="number" min="0" step="1" inputmode="numeric" placeholder="กรอกจำนวนคำ">
+                <p class="hint">หมายเหตุ: Edit &amp; Mix งานเพลงคัฟเวอร์ คิด 3.50 บาทต่อคำ</p>
+              </div>
+              <div class="field">
+                <label for="cover-singers">จำนวนผู้ร้อง</label>
+                <input id="cover-singers" type="number" min="1" step="1" value="1" inputmode="numeric">
+                <p class="hint" id="cover-promotion-hint" aria-live="polite"></p>
+              </div>
+              <fieldset class="field">
+                <legend class="legend">บริการดนตรี (เลือกได้ 1 รายการ)</legend>
+                <div class="radio-list">
+                  <label class="choice"><input type="radio" name="cover-music-service" value="none" checked><span>ไม่ใช้บริการดนตรีเพิ่มเติม</span></label>
+                  <label class="choice"><input type="radio" name="cover-music-service" value="instrument"><span>Instrument 1 ไฟล์ <small>100 บาท</small></span></label>
+                  <label class="choice"><input type="radio" name="cover-music-service" value="stems"><span>แยก Instrument stems หรือเปลี่ยนคีย์ 1 เพลง <small>150 บาท</small></span></label>
+                  <label class="choice"><input type="radio" name="cover-music-service" value="rearrange"><span>เรียบเรียงดนตรีใหม่ (Rearrange) <small>2,000 บาท รวมมิกซ์ดนตรี</small></span></label>
+                </div>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">บริการ Vocal Melody Guide</legend>
+                <label class="choice"><input id="cover-guide" type="checkbox"><span>จัดทำ Vocal Melody Guide <small>600 บาท</small></span></label>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">บริการเสียงร้องเพิ่มเติม</legend>
+                <label class="choice"><input id="cover-harmony-adlib" type="checkbox"><span>เพิ่มไลน์ Harmony หรือแอดลิบที่มีทำนอง <small>700 บาท</small></span></label>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">ตัวเลือกเพิ่มเติม</legend>
+                <div class="check-list">
+                  <label class="choice"><input id="cover-commercial" type="checkbox"><span>ใช้งานเชิงพาณิชย์ <small>เพิ่ม 100%</small></span></label>
+                  <label class="choice"><input id="cover-rush" type="checkbox"><span>งานเร่งพิเศษ <small>เพิ่ม 20% และขึ้นอยู่กับคิวร้าน</small></span></label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="service-form" id="compose-form" hidden>
+            <div class="form-content">
+              <fieldset class="field">
+                <legend class="legend">บริการเนื้อเพลง</legend>
+                <div class="radio-list">
+                  <label class="choice"><input type="radio" name="compose-lyrics-service" value="new" checked><span>แต่งเนื้อเพลงใหม่ <small>1,500 บาท</small></span></label>
+                  <label class="choice"><input type="radio" name="compose-lyrics-service" value="edit"><span>แก้ไขเนื้อเพลงที่มีอยู่แล้ว <small>750 บาท</small></span></label>
+                  <label class="choice"><input type="radio" name="compose-lyrics-service" value="none"><span>ไม่ใช้บริการด้านเนื้อเพลง <small>0 บาท</small></span></label>
+                </div>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">บริการทำนอง</legend>
+                <div class="radio-list">
+                  <label class="choice"><input type="radio" name="compose-melody-service" value="new" checked><span>แต่งทำนองใหม่ <small>1,500 บาท</small></span></label>
+                  <label class="choice"><input type="radio" name="compose-melody-service" value="edit"><span>แก้ไขทำนองที่มีอยู่แล้ว <small>750 บาท</small></span></label>
+                  <label class="choice"><input type="radio" name="compose-melody-service" value="none"><span>ไม่ใช้บริการด้านทำนอง <small>0 บาท</small></span></label>
+                </div>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">บริการดนตรี</legend>
+                <div class="radio-list">
+                  <label class="choice"><input type="radio" name="compose-music-service" value="new" checked><span>ผลิตดนตรีใหม่ <small>4,000 บาท</small></span></label>
+                  <label class="choice"><input id="compose-music-service-none" type="radio" name="compose-music-service" value="none"><span>ไม่ใช้บริการผลิตดนตรี <small>0 บาท</small></span></label>
+                </div>
+                <label class="choice"><input id="compose-demo" type="checkbox"><span>มีเดโมดนตรีที่แต่งเอง <small>ลดค่าผลิตดนตรี 1,000 บาท เมื่อเลือกผลิตดนตรีใหม่</small></span></label>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">บริการ Vocal Melody Guide</legend>
+                <label class="choice"><input id="compose-guide" type="checkbox"><span>จัดทำ Vocal Melody Guide <small>600 บาท</small></span></label>
+              </fieldset>
+              <fieldset class="field">
+                <legend class="legend">บริการเสียงร้องเพิ่มเติม</legend>
+                <label class="choice"><input id="compose-harmony-adlib" type="checkbox"><span>เพิ่มไลน์ Harmony หรือแอดลิบที่มีทำนอง <small>700 บาท</small></span></label>
+              </fieldset>
+              <div class="field">
+                <label for="compose-syllables">จำนวนคำ (หน่วย)</label>
+                <input id="compose-syllables" type="number" min="0" step="1" inputmode="numeric" placeholder="กรอกจำนวนคำ">
+                <p class="hint">หมายเหตุ: Edit &amp; Mix เพลงแต่ง คิด 3.50 บาทต่อคำ</p>
+              </div>
+              <div class="field">
+                <label for="compose-singers">จำนวนผู้ร้อง</label>
+                <input id="compose-singers" type="number" min="1" step="1" value="1" inputmode="numeric">
+                <p class="hint" id="compose-promotion-hint" aria-live="polite"></p>
+              </div>
+              <fieldset class="field">
+                <legend class="legend">ตัวเลือกเพิ่มเติม</legend>
+                <div class="check-list">
+                  <label class="choice"><input id="compose-commercial" type="checkbox"><span>ใช้งานเชิงพาณิชย์ <small>เพิ่ม 100%</small></span></label>
+                  <label class="choice"><input id="compose-rush" type="checkbox"><span>งานเร่งพิเศษ <small>เพิ่ม 20% และขึ้นอยู่กับคิวร้าน</small></span></label>
+                </div>
+              </fieldset>
+              <div class="estimate-note">ระบบใช้โปรโมชั่นตามจำนวนผู้ร้องที่เข้าเงื่อนไขโดยอัตโนมัติ โดยเลือกส่วนลดที่สูงที่สุดเพียงรายการเดียว และสามารถเลือกโปร 11.11 เพิ่มได้ในช่วงเวลาที่กำหนด ส่วนลด 11.11 คิดหลังรายการอื่นและก่อนส่วนลด VIP (ต้องยืนยันสิทธิ์ VIP กับทางร้าน) ค่าจ้างนักร้องรับจ้างไม่รวมในยอดนี้</div>
+            </div>
+          </div>
+          <fieldset class="field promo-1111-control">
+            <legend class="legend">โปรโมชั่นพิเศษ</legend>
+            <label class="promo-1111-toggle" for="promo-1111">
+              <input id="promo-1111" type="checkbox" disabled>
+              <span class="promo-1111-copy">
+                <strong>โปรพิเศษ 11.11 ลดเพิ่ม 20%</strong>
+                <small id="promo-1111-status" aria-live="polite">เลือกใช้ได้วันที่ 11 พ.ย. 2026 เวลา 00:01–23:59 (เวลาไทย)</small>
+              </span>
+            </label>
+            <p class="hint">ส่วนลดนี้คิดหลังค่าบริการและโปรโมชั่นตามจำนวนผู้ร้อง ก่อนส่วนลด VIP (สิทธิ์ VIP ให้ยืนยันกับทางร้าน)</p>
+          </fieldset>
+          <fieldset class="demo-controls">
+            <legend>ปุ่มเดโม่สำหรับทดลองคำนวณ</legend>
+            <p>ปุ่มเหล่านี้ใช้จำลองส่วนลดในเครื่องคำนวณเท่านั้น ไม่ได้ยืนยันสิทธิ์หรือเปลี่ยนช่วงเวลาโปรโมชั่นจริง สำหรับ VIP: เพลงคัฟเวอร์ทดลองลด 50% จากยอด Mix เสียงร้องทั้งหมด ส่วนเพลงแต่งลด 50% จากยอดบริการทั้งหมดหลังรายการปรับ รวม Part ดนตรี แต่ไม่รวมค่าจ้างนักร้อง</p>
+            <div class="demo-buttons">
+              <button class="demo-button" id="demo-1111" type="button" aria-pressed="false">ทดลองโปร 11.11 ลด 20%</button>
+              <button class="demo-button" id="demo-vip" type="button" aria-pressed="false">ทดลองลูกค้า VIP ลด 50%</button>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+
+      <aside class="panel result" aria-live="polite" aria-atomic="true">
+        <p class="result-label">ประมาณการราคา</p>
+        <h2 id="result-title">เพลงคัฟเวอร์</h2>
+        <p class="total" id="total">—</p>
+        <p class="empty" id="empty">กรอกรายละเอียดเพื่อเริ่มคำนวณราคา</p>
+        <ul class="breakdown" id="breakdown" hidden></ul>
+        <p class="result-note" id="result-note">รวม Service charge งาน Cover 20% และตัวเลือกที่เลือกไว้ ไม่รวมส่วนลด VIP และโปรโมชั่น</p>
+        <p class="result-note">ยอดนี้เป็นราคาเบื้องต้น ไม่ใช่ใบเสนอราคา ค่าใช้จ่ายและขอบเขตงานขั้นสุดท้ายให้ยืนยันกับทางร้าน</p>
+        <p class="result-note">กรอกจำนวนคำ (หน่วย) เป็นตัวเลขเพื่อคำนวณราคา</p>
+      </aside>
+    </div>
+  </main>
+  <footer><div class="container">Muecity · บริการผลิตเพลง</div></footer>
+
+  <script>
+    (() => {
+      const form = document.getElementById("price-form");
+      const coverForm = document.getElementById("cover-form");
+      const composeForm = document.getElementById("compose-form");
+      const totalOutput = document.getElementById("total");
+      const emptyOutput = document.getElementById("empty");
+      const breakdownOutput = document.getElementById("breakdown");
+      const resultTitle = document.getElementById("result-title");
+      const resultNote = document.getElementById("result-note");
+      const promo1111Input = document.getElementById("promo-1111");
+      const promo1111Status = document.getElementById("promo-1111-status");
+      const promo1111Toggle = document.querySelector(".promo-1111-toggle");
+      const demo1111Button = document.getElementById("demo-1111");
+      const demoVipButton = document.getElementById("demo-vip");
+      let demo1111Enabled = false;
+      let demoVipEnabled = false;
+      const money = new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 });
+
+      function addLine(label, amount, final = false) {
+        const item = document.createElement("li");
+        if (final) item.className = "final";
+        const name = document.createElement("span");
+        const value = document.createElement("span");
+        name.textContent = label;
+        value.textContent = `${money.format(amount)} บาท`;
+        item.append(name, value);
+        breakdownOutput.append(item);
+      }
+
+      function addAdjustments(subtotal, serviceType, commercial, rush, promotion, specialPromotion, vocalMixAmount) {
+        const serviceRate = serviceType === "cover" ? 0.2 : 0.3;
+        const serviceCharge = Math.round(subtotal * serviceRate);
+        subtotal += serviceCharge;
+        addLine(`Service charge งาน ${serviceType === "cover" ? "Cover" : "Compose"} (+${serviceRate * 100}%)`, serviceCharge);
+        if (commercial) {
+          const charge = Math.round(subtotal);
+          subtotal += charge;
+          addLine("ใช้งานเชิงพาณิชย์ (+100%)", charge);
+        }
+        if (rush) {
+          const charge = Math.round(subtotal * 0.2);
+          subtotal += charge;
+          addLine("งานเร่งพิเศษ (+20%)", charge);
+        }
+        subtotal = applyPromotion(subtotal, promotion);
+        const appliedSpecialPromotion = specialPromotion && subtotal > 0;
+        if (appliedSpecialPromotion) {
+          const discount = Math.round(subtotal * 0.2);
+          subtotal -= discount;
+          addLine("โปรโมชั่นพิเศษ 11.11 (ลด 20%)", -discount);
+        }
+        if (demoVipEnabled && subtotal > 0) {
+          if (serviceType === "compose") {
+            const discount = Math.round(subtotal * 0.5);
+            subtotal -= discount;
+            addLine("ทดลองส่วนลด VIP เพลงแต่ง (ลด 50% จากยอดบริการทั้งหมด รวม Part ดนตรี)", -discount);
+          } else if (vocalMixAmount > 0) {
+            let eligibleMix = vocalMixAmount * (promotion ? 1 - promotion.rate : 1);
+            if (appliedSpecialPromotion) eligibleMix *= 0.8;
+            const discount = Math.round(eligibleMix * 0.5);
+            subtotal -= discount;
+            addLine("ทดลองส่วนลด VIP เพลงคัฟเวอร์ (ลด 50% เฉพาะยอด Mix เสียงร้อง)", -discount);
+          }
+        }
+        addLine("ราคารวมโดยประมาณ", subtotal, true);
+        return subtotal;
+      }
+
+      function is1111PromotionAvailable(now = new Date()) {
+        const startsAt = new Date("2026-11-11T00:01:00+07:00");
+        const endsAt = new Date("2026-11-12T00:00:00+07:00");
+        return now >= startsAt && now < endsAt;
+      }
+
+      function update1111PromotionAvailability() {
+        const isAvailable = is1111PromotionAvailable();
+        const startsAt = new Date("2026-11-11T00:01:00+07:00");
+        promo1111Input.disabled = !isAvailable;
+        promo1111Toggle.classList.toggle("is-available", isAvailable);
+        if (!isAvailable) promo1111Input.checked = false;
+        promo1111Status.textContent = isAvailable
+          ? "โปรเปิดแล้ว! เลือกช่องนี้เพื่อรับส่วนลด · สิ้นสุด 23:59 วันนี้"
+          : new Date() < startsAt
+            ? "เลือกใช้ได้วันที่ 11 พ.ย. 2026 เวลา 00:01–23:59 (เวลาไทย)"
+            : "โปรโมชั่น 11.11 สิ้นสุดแล้ว";
+      }
+
+      function numericValue(id, min) {
+        const input = document.getElementById(id);
+        const value = Number(input.value);
+        return Number.isInteger(value) && value >= min ? value : null;
+      }
+
+      function clearResult(message = "กรอกรายละเอียดเพื่อเริ่มคำนวณราคา") {
+        totalOutput.textContent = "—";
+        emptyOutput.textContent = message;
+        emptyOutput.hidden = false;
+        breakdownOutput.replaceChildren();
+        breakdownOutput.hidden = true;
+      }
+
+      function updatePrice() {
+        breakdownOutput.replaceChildren();
+        const service = document.querySelector('input[name="service"]:checked').value;
+        const isCover = service === "cover";
+        coverForm.hidden = !isCover;
+        composeForm.hidden = isCover;
+        resultTitle.textContent = isCover ? "เพลงคัฟเวอร์" : "เพลงแต่ง";
+        resultNote.textContent = isCover
+          ? "ใช้โปรโมชั่นตามจำนวนผู้ร้องที่เข้าเงื่อนไขโดยอัตโนมัติ และเลือกโปร 11.11 ได้ตามวันและเวลาที่กำหนด; ไม่รวมส่วนลด VIP"
+          : "ใช้โปรโมชั่นตามจำนวนผู้ร้องที่เข้าเงื่อนไขโดยอัตโนมัติ และเลือกโปร 11.11 ได้ตามวันและเวลาที่กำหนด; ไม่รวมส่วนลด VIP และค่าจ้างนักร้อง";
+
+        let subtotal = 0;
+        if (isCover) {
+          const syllablesInput = document.getElementById("cover-syllables");
+          const hasSyllableCount = syllablesInput.value.trim() !== "";
+          const syllables = hasSyllableCount ? numericValue("cover-syllables", 0) : 0;
+          const singers = numericValue("cover-singers", 1);
+          if (syllables === null || singers === null) return clearResult("กรุณาตรวจสอบจำนวนคำและจำนวนผู้ร้อง");
+          const coverMusicService = document.querySelector('input[name="cover-music-service"]:checked').value;
+          const hasMusicOption = coverMusicService !== "none";
+          const hasCoverGuide = document.getElementById("cover-guide").checked;
+          const hasHarmonyAdlib = document.getElementById("cover-harmony-adlib").checked;
+          const promotion = getSingerPromotion("cover", singers);
+          updatePromotionHint("cover-promotion-hint", promotion);
+          if (!hasSyllableCount && !hasMusicOption && !hasCoverGuide && !hasHarmonyAdlib) return clearResult();
+          const vocalMixAmount = addSingerMixLines(syllables, singers, "cover");
+          subtotal += vocalMixAmount;
+          const musicOptions = {
+            instrument: ["Instrument 1 ไฟล์", 100],
+            stems: ["แยก Instrument stems หรือเปลี่ยนคีย์", 150],
+            rearrange: ["เรียบเรียงดนตรีใหม่ (รวมมิกซ์ดนตรี)", 2000]
+          };
+          if (coverMusicService !== "none") {
+            const [label, price] = musicOptions[coverMusicService];
+            subtotal += price;
+            addLine(label, price);
+          }
+          if (hasCoverGuide) {
+            subtotal += 600;
+            addLine("Vocal Melody Guide", 600);
+          }
+          if (hasHarmonyAdlib) {
+            subtotal += 700;
+            addLine("เพิ่มไลน์ Harmony หรือแอดลิบที่มีทำนอง", 700);
+          }
+          subtotal = addAdjustments(
+            subtotal,
+            "cover",
+            document.getElementById("cover-commercial").checked,
+            document.getElementById("cover-rush").checked,
+            promotion,
+            (promo1111Input.checked && is1111PromotionAvailable()) || demo1111Enabled,
+            vocalMixAmount
+          );
+        } else {
+          const syllablesInput = document.getElementById("compose-syllables");
+          const hasSyllableCount = syllablesInput.value.trim() !== "";
+          const syllables = hasSyllableCount ? numericValue("compose-syllables", 0) : 0;
+          const singers = numericValue("compose-singers", 1);
+          if (syllables === null || singers === null) return clearResult("กรุณาตรวจสอบจำนวนคำและจำนวนผู้ร้อง");
+          const lyricRate = { new: 1500, edit: 750, none: 0 };
+          const melodyRate = { new: 1500, edit: 750, none: 0 };
+          const lyricType = document.querySelector('input[name="compose-lyrics-service"]:checked').value;
+          const melodyType = document.querySelector('input[name="compose-melody-service"]:checked').value;
+          const composeMusicService = document.querySelector('input[name="compose-music-service"]:checked').value;
+          const promotion = getSingerPromotion("compose", singers);
+          updatePromotionHint("compose-promotion-hint", promotion);
+          const hasComposeAnswers = hasSyllableCount
+            || lyricType !== "none"
+            || melodyType !== "none"
+            || composeMusicService !== "none"
+            || document.getElementById("compose-guide").checked
+            || document.getElementById("compose-harmony-adlib").checked
+            || document.getElementById("compose-commercial").checked
+            || document.getElementById("compose-rush").checked;
+          if (!hasComposeAnswers) return clearResult();
+          const lyricLabel = { new: "แต่งเนื้อเพลง", edit: "แก้ไขเนื้อเพลง", none: "ไม่ใช้บริการด้านเนื้อเพลง" }[lyricType];
+          const melodyLabel = { new: "แต่งทำนอง", edit: "แก้ไขทำนอง", none: "ไม่ใช้บริการด้านทำนอง" }[melodyType];
+          subtotal += lyricRate[lyricType];
+          addLine(lyricLabel, lyricRate[lyricType]);
+          subtotal += melodyRate[melodyType];
+          addLine(melodyLabel, melodyRate[melodyType]);
+          if (composeMusicService === "new") {
+            const musicPrice = document.getElementById("compose-demo").checked ? 3000 : 4000;
+            subtotal += musicPrice;
+            addLine(
+              document.getElementById("compose-demo").checked
+                ? "ผลิตดนตรีใหม่ (มีเดโมดนตรีที่แต่งเอง ลด 1,000 บาท)"
+                : "ผลิตดนตรีใหม่",
+              musicPrice
+            );
+          }
+          if (document.getElementById("compose-guide").checked) {
+            subtotal += 600;
+            addLine("Vocal Melody Guide", 600);
+          }
+          if (document.getElementById("compose-harmony-adlib").checked) {
+            subtotal += 700;
+            addLine("เพิ่มไลน์ Harmony หรือแอดลิบที่มีทำนอง", 700);
+          }
+          const vocalMixAmount = addSingerMixLines(syllables, singers, "compose");
+          subtotal += vocalMixAmount;
+          subtotal = addAdjustments(
+            subtotal,
+            "compose",
+            document.getElementById("compose-commercial").checked,
+            document.getElementById("compose-rush").checked,
+            promotion,
+            (promo1111Input.checked && is1111PromotionAvailable()) || demo1111Enabled,
+            vocalMixAmount
+          );
+        }
+        emptyOutput.hidden = true;
+        totalOutput.textContent = `${money.format(subtotal)} บาท`;
+        breakdownOutput.hidden = false;
+      }
+
+      function getSingerPromotion(service, singers) {
+        if (service === "cover") {
+          if (singers >= 7) return { label: "โปรโมชั่น Cover ผู้ร้อง 7 คนขึ้นไป", rate: 0.3 };
+          if (singers === 2) return { label: "โปรโมชั่น Cover ผู้ร้องคู่", rate: 0.1 };
+          return null;
+        }
+        if (singers >= 5) return { label: "โปรโมชั่น Compose กลุ่มผู้ร้อง 5 คนขึ้นไป", rate: 0.25 };
+        if (singers >= 4) return { label: "โปรโมชั่น Compose ผู้ร้อง 4 คนขึ้นไป", rate: 0.15 };
+        return null;
+      }
+
+      function updatePromotionHint(elementId, promotion) {
+        const hint = document.getElementById(elementId);
+        hint.textContent = promotion
+          ? `ใช้โปรโมชั่นอัตโนมัติ: ${promotion.label} ลด ${promotion.rate * 100}%`
+          : "จำนวนผู้ร้องยังไม่เข้าเงื่อนไขโปรโมชั่นส่วนลดอัตโนมัติ";
+      }
+
+      function applyPromotion(subtotal, promotion) {
+        if (!promotion || subtotal <= 0) return subtotal;
+        const discount = Math.round(subtotal * promotion.rate);
+        addLine(`${promotion.label} (ลด ${promotion.rate * 100}%)`, -discount);
+        return subtotal - discount;
+      }
+
+      function addSingerMixLines(syllables, singers, service) {
+        const ratePerSyllable = 3.5;
+        const pricePerSinger = syllables * ratePerSyllable;
+        for (let singer = 1; singer <= singers; singer += 1) {
+          addLine(
+            `นักร้องคนที่ ${money.format(singer)} (Edit & Mix เสียงร้อง · ${money.format(syllables)} คำ × ${ratePerSyllable.toFixed(2)} บาท)`,
+            pricePerSinger
+          );
+        }
+        return pricePerSinger * singers;
+      }
+
+      document.querySelectorAll('input[name="service"]').forEach(input => input.addEventListener("change", updatePrice));
+      document.querySelectorAll('input[name="compose-music-service"]').forEach(input => input.addEventListener("change", () => {
+        const hasOriginalDemo = document.getElementById("compose-music-service-none").checked;
+        const demoInput = document.getElementById("compose-demo");
+        demoInput.disabled = hasOriginalDemo;
+        if (hasOriginalDemo) document.getElementById("compose-demo").checked = false;
+        updatePrice();
+      }));
+      document.getElementById("clear-form").addEventListener("click", () => {
+        document.getElementById("cover-syllables").value = "";
+        document.getElementById("compose-syllables").value = "";
+        document.getElementById("cover-singers").value = "1";
+        document.getElementById("compose-singers").value = "1";
+        document.querySelectorAll('input[name="cover-music-service"]').forEach(input => {
+          input.checked = input.value === "none";
+        });
+        for (const group of ["compose-lyrics-service", "compose-melody-service", "compose-music-service"]) {
+          document.querySelectorAll(`input[name="${group}"]`).forEach(input => {
+            input.checked = input.value === "none";
+          });
+        }
+        for (const id of ["cover-guide", "cover-harmony-adlib", "cover-commercial", "cover-rush", "compose-demo", "compose-guide", "compose-harmony-adlib", "compose-commercial", "compose-rush"]) {
+          document.getElementById(id).checked = false;
+        }
+        promo1111Input.checked = false;
+        demo1111Enabled = false;
+        demoVipEnabled = false;
+        demo1111Button.setAttribute("aria-pressed", "false");
+        demoVipButton.setAttribute("aria-pressed", "false");
+        document.getElementById("compose-demo").disabled = true;
+        updatePrice();
+      });
+      demo1111Button.addEventListener("click", () => {
+        demo1111Enabled = !demo1111Enabled;
+        demo1111Button.setAttribute("aria-pressed", String(demo1111Enabled));
+        updatePrice();
+      });
+      demoVipButton.addEventListener("click", () => {
+        demoVipEnabled = !demoVipEnabled;
+        demoVipButton.setAttribute("aria-pressed", String(demoVipEnabled));
+        updatePrice();
+      });
+      form.addEventListener("input", updatePrice);
+      promo1111Input.addEventListener("change", updatePrice);
+      update1111PromotionAvailability();
+      window.setInterval(() => {
+        update1111PromotionAvailability();
+        updatePrice();
+      }, 15000);
+      updatePrice();
+    })();
+  </script>
+  <script>
+    (() => {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion || !("IntersectionObserver" in window)) return;
+
+      const sections = document.querySelectorAll("main > .intro, main > .service-picker, main > .calculator");
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      }, { rootMargin: "0px 0px -6% 0px", threshold: 0.05 });
+
+      sections.forEach(section => {
+        section.classList.add("section-reveal");
+        observer.observe(section);
+      });
+    })();
+  </script>
+</body>
+</html>

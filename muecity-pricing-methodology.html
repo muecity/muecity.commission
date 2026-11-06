@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>หลักเกณฑ์การคำนวณค่าบริการผลิตเพลง | Muecity</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 19mm 20mm;
+    }
+
+    :root {
+      color: #171717;
+      background: #fff;
+      font-family: "Thonburi", "Leelawadee UI", sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.65;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    h1, h2, h3, p, ul, ol, table { margin-top: 0; }
+    h1 { margin-bottom: 5mm; font-size: 23pt; line-height: 1.35; }
+    h2 {
+      margin: 0 0 4mm;
+      padding-bottom: 2mm;
+      border-bottom: 1px solid #777;
+      font-size: 15pt;
+      line-height: 1.4;
+    }
+    h3 { margin-bottom: 2mm; font-size: 11.5pt; }
+    p { margin-bottom: 3mm; }
+    ul, ol { padding-left: 7mm; margin-bottom: 3mm; }
+    li { margin-bottom: 1mm; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 3mm 0 4mm;
+      font-size: 9.5pt;
+    }
+    th, td {
+      padding: 2mm 2.5mm;
+      border: 1px solid #888;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f1f1; font-weight: 700; }
+    .document-header {
+      margin-bottom: 9mm;
+      padding-bottom: 5mm;
+      border-bottom: 2px solid #222;
+    }
+    .brand { margin-bottom: 2mm; font-size: 10pt; font-weight: 700; letter-spacing: .06em; }
+    .subtitle, .meta, .muted { color: #444; }
+    .meta { margin-bottom: 0; font-size: 9pt; }
+    .lead { font-size: 11pt; }
+    .notice {
+      margin: 3mm 0 5mm;
+      padding: 3mm 4mm;
+      border: 1px solid #777;
+    }
+    .section { margin-bottom: 7mm; }
+    .formula {
+      margin: 2mm 0 4mm;
+      padding: 3mm 4mm;
+      border-left: 2px solid #333;
+      background: #f5f5f5;
+      font-weight: 600;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 10mm 1fr;
+      gap: 2mm;
+      margin-bottom: 2.5mm;
+      break-inside: avoid;
+    }
+    .step-number { font-weight: 700; }
+    .example {
+      margin: 3mm 0 4mm;
+      padding: 3mm 4mm;
+      border: 1px solid #888;
+      break-inside: avoid;
+    }
+    .example p:last-child { margin-bottom: 0; }
+    .amount { text-align: right; white-space: nowrap; }
+    .total-row { font-weight: 700; }
+    .worksheet-line {
+      display: inline-block;
+      min-width: 22mm;
+      border-bottom: 1px solid #555;
+    }
+    .worksheet p { margin-bottom: 3mm; }
+    .footer-note {
+      margin-top: 8mm;
+      padding-top: 3mm;
+      border-top: 1px solid #777;
+      color: #444;
+      font-size: 9pt;
+    }
+    .worksheet-table .worksheet-blank { height: 13mm; }
+    .keep-together { break-inside: avoid; }
+
+    @media screen {
+      body { max-width: 190mm; margin: 12mm auto; padding: 10mm; box-shadow: 0 0 8mm #ccc; }
+    }
+
+    @media print {
+      a { color: inherit; text-decoration: none; }
+      .section { break-inside: auto; }
+      .page-four { break-before: page; }
+      h2, h3 { break-after: avoid; }
+      table, .notice, .formula { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="document-header">
+    <p class="brand">MUECITY · บริการผลิตเพลง</p>
+    <h1>หลักเกณฑ์การคำนวณค่าบริการผลิตเพลง</h1>
+    <p class="subtitle">เอกสารอธิบายรายการคิดราคา ลำดับการบวกและส่วนลด และแบบฟอร์มประมาณการสำหรับลูกค้า</p>
+    <p class="meta">ฉบับอ้างอิง: 5 พฤศจิกายน 2569 (2026) · สกุลเงิน: บาท · อัตราอ้างอิงตามระบบคำนวณของ Muecity</p>
+  </header>
+
+  <section class="section">
+    <h2>1. วัตถุประสงค์และขอบเขต</h2>
+    <p class="lead">เอกสารนี้เปิดเผยแนวทางการคำนวณค่าบริการโดยเรียงตามขั้นตอน เพื่อให้ลูกค้าตรวจสอบที่มาของยอดประมาณการได้ก่อนขอใบเสนอราคา</p>
+    <div class="notice"><strong>โปรดทราบ:</strong> ยอดจากสูตรเป็นราคาเบื้องต้น รายการที่เลือก ขอบเขตงาน สิทธิ์โปรโมชั่น และค่าใช้จ่ายนักร้องรับจ้างต้องได้รับการยืนยันจาก Muecity ก่อนเริ่มงาน ใบเสนอราคาที่ร้านยืนยันเป็นเอกสารอ้างอิงยอดสุดท้าย</div>
+    <p>ระบบคำนวณใช้จำนวนคำที่ลูกค้าเตรียมและกรอกเป็นตัวเลข ไม่ได้อ่านข้อความหรือเนื้อเพลงเพื่อนับคำให้อัตโนมัติ จำนวนคำที่ใช้คิด Edit &amp; Mix เสียงร้องคูณกับจำนวนผู้ร้อง</p>
+  </section>
+
+  <section class="section">
+    <h2>2. อัตราค่าบริการพื้นฐาน</h2>
+    <table>
+      <thead><tr><th>รายการ</th><th>อัตรา / เงื่อนไข</th></tr></thead>
+      <tbody>
+        <tr><td>Edit &amp; Mix เสียงร้อง — เพลงคัฟเวอร์</td><td>3.50 บาทต่อคำ ต่อผู้ร้อง</td></tr>
+        <tr><td>Edit &amp; Mix เสียงร้อง — เพลงแต่ง</td><td>3.50 บาทต่อคำ ต่อผู้ร้อง</td></tr>
+        <tr><td>Vocal Melody Guide</td><td>600 บาท เมื่อเลือกใช้บริการ</td></tr>
+        <tr><td>เพิ่มไลน์ Harmony หรือแอดลิบที่มีทำนอง</td><td>700 บาท เมื่อเลือกใช้บริการ</td></tr>
+        <tr><td>Instrument 1 ไฟล์ (งานคัฟเวอร์)</td><td>100 บาท</td></tr>
+        <tr><td>แยก Instrument stems หรือเปลี่ยนคีย์ 1 เพลง (งานคัฟเวอร์)</td><td>150 บาท</td></tr>
+        <tr><td>เรียบเรียงดนตรีใหม่ (Rearrange) (งานคัฟเวอร์)</td><td>2,000 บาท รวมมิกซ์ดนตรี</td></tr>
+        <tr><td>แต่งเนื้อเพลงใหม่ / แก้ไขเนื้อเพลงเดิม (เพลงแต่ง)</td><td>1,500 / 750 บาท</td></tr>
+        <tr><td>แต่งทำนองใหม่ / แก้ไขทำนองเดิม (เพลงแต่ง)</td><td>1,500 / 750 บาท</td></tr>
+        <tr><td>ผลิตดนตรีใหม่ (เพลงแต่ง)</td><td>4,000 บาท; ลด 1,000 บาทเมื่อมีเดโมดนตรีที่แต่งเอง และเลือกผลิตดนตรีใหม่</td></tr>
+        <tr><td>มาสเตอริงเพื่อเผยแพร่บนสตรีมมิง</td><td>300 บาท; ประเมินแยกจากตัวคำนวณหลัก</td></tr>
+        <tr><td>แปลเพลงเป็นภาษาไทย</td><td>700 บาท; ประเมินแยกจากตัวคำนวณหลัก</td></tr>
+      </tbody>
+    </table>
+    <div class="formula">ค่าตัดต่อและมิกซ์เสียงร้อง = จำนวนคำ × 3.50 บาท × จำนวนผู้ร้อง</div>
+    <p>บริการเนื้อเพลง ทำนอง และดนตรีของเพลงแต่งเลือกตามขอบเขตงาน โดยระบบนำเฉพาะรายการที่เลือกมารวมเป็นยอดบริการตั้งต้น ส่วน Instrument / stems / เปลี่ยนคีย์ / Rearrange เป็นตัวเลือกแยกของงานคัฟเวอร์และเลือกได้ครั้งละหนึ่งรายการ</p>
+  </section>
+
+  <section class="section">
+    <h2>3. ลำดับการคำนวณราคาและเปอร์เซ็นต์</h2>
+    <p>เปอร์เซ็นต์ไม่ได้บวกหรือลบจากฐานเดียวกันทั้งหมด แต่คำนวณต่อเนื่องจากยอด ณ ขั้นก่อนหน้า โดยเรียงดังนี้</p>
+    <div class="step"><span class="step-number">1.</span><div><strong>รวมค่าบริการตั้งต้น</strong> — รวม Edit &amp; Mix ของผู้ร้องแต่ละคนกับบริการหลักและบริการเสริมที่เลือก</div></div>
+    <div class="step"><span class="step-number">2.</span><div><strong>บวก Service charge</strong> — Cover เพิ่ม 20% จากยอดบริการตั้งต้น; เพลงแต่งเพิ่ม 30% จากยอดบริการตั้งต้น</div></div>
+    <div class="step"><span class="step-number">3.</span><div><strong>บวก Commercial (ถ้ามี)</strong> — เพิ่ม 100% จากยอดหลัง Service charge กล่าวคือคิดเพิ่มเท่ากับยอด ณ ขั้นนั้น</div></div>
+    <div class="step"><span class="step-number">4.</span><div><strong>บวกงานเร่งพิเศษ (ถ้ามี)</strong> — เพิ่ม 20% จากยอดหลังรายการก่อนหน้า และขึ้นอยู่กับคิวที่ร้านยืนยัน</div></div>
+    <div class="step"><span class="step-number">5.</span><div><strong>หักโปรโมชั่นตามจำนวนผู้ร้อง (ถ้าเข้าเงื่อนไข)</strong> — คิดจากยอดหลังบวกค่าบริการและค่าปรับเพิ่มแล้ว</div></div>
+    <div class="step"><span class="step-number">6.</span><div><strong>หักโปรโมชั่น 11.11 (ถ้าเปิดใช้ได้และเลือกใช้)</strong> — ลด 20% จากยอดหลังโปรโมชั่นตามจำนวนผู้ร้อง</div></div>
+    <div class="step"><span class="step-number">7.</span><div><strong>หักส่วนลด VIP (เมื่อร้านยืนยันสิทธิ์)</strong> — คำนวณเป็นลำดับสุดท้าย โดยฐานที่เข้าเงื่อนไขแตกต่างกันระหว่าง Cover กับเพลงแต่ง</div></div>
+    <div class="formula">
+      <p>S0 = ผลรวมค่าบริการที่เลือก + (จำนวนคำ × 3.50 × จำนวนผู้ร้อง)</p>
+      <p>S1 = S0 + round(S0 × 20%) สำหรับ Cover หรือ round(S0 × 30%) สำหรับเพลงแต่ง</p>
+      <p>S2 = S1 + round(S1 × 100%) เมื่อเลือก Commercial; หากไม่เลือกให้ใช้ S1</p>
+      <p>S3 = S2 + round(S2 × 20%) เมื่องานเร่งได้รับอนุมัติ; หากไม่เลือกให้ใช้ S2</p>
+      <p>S4 = S3 − round(S3 × อัตราโปรโมชั่นผู้ร้อง) เมื่อเข้าเงื่อนไข</p>
+      <p>S5 = S4 − round(S4 × 20%) เมื่อใช้ 11.11 ได้; หากไม่ใช้ให้ใช้ S4</p>
+      <p>ยอดสุดท้าย = S5 − ส่วนลด VIP ที่เข้าเงื่อนไข</p>
+    </div>
+    <div class="formula">ยอดประมาณการ = ยอดหลัง Service charge, Commercial และงานเร่งพิเศษ − โปรโมชั่นตามจำนวนผู้ร้อง − 11.11 − ส่วนลด VIP</div>
+    <p class="muted">ส่วนลดเปอร์เซ็นต์คำนวณแบบต่อเนื่อง ไม่ใช่นำเปอร์เซ็นต์มาบวกกัน เช่น ลด 10% แล้วลด 20% จะเหลือ 90% × 80% = 72% ของยอดก่อนส่วนลด ไม่ใช่ลดรวม 30%</p>
+  </section>
+
+  <section class="section">
+    <h2>4. โปรโมชั่นตามจำนวนผู้ร้อง</h2>
+    <table>
+      <thead><tr><th>ประเภทงาน</th><th>จำนวนผู้ร้อง</th><th>ส่วนลด</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr><td>เพลงคัฟเวอร์</td><td>2 คน</td><td>10%</td><td>โปรโมชั่นผู้ร้องคู่</td></tr>
+        <tr><td>เพลงคัฟเวอร์</td><td>7 คนขึ้นไป</td><td>30%</td><td>สำหรับกลุ่มผู้ร้อง 7 คนขึ้นไป</td></tr>
+        <tr><td>เพลงแต่ง</td><td>4 คน</td><td>15%</td><td>โปรโมชั่นกลุ่มผู้ร้อง</td></tr>
+        <tr><td>เพลงแต่ง</td><td>5 คนขึ้นไป</td><td>25%</td><td>ใช้แทนอัตรากลุ่ม 4 คน</td></tr>
+      </tbody>
+    </table>
+    <p>ระบบใช้โปรโมชั่นตามจำนวนผู้ร้องที่ตรงกับประเภทงานและจำนวนคนโดยอัตโนมัติ อัตราที่แสดงในตารางเป็นคนละเงื่อนไขกับส่วนลด VIP และ 11.11</p>
+  </section>
+
+  <section class="section">
+    <h2>5. เงื่อนไขโปรโมชั่น 11.11</h2>
+    <ul>
+      <li>ส่วนลด 20% ใช้ได้วันที่ 11 พฤศจิกายน 2026 เวลา 00:01–23:59 น. ตามเวลาไทย</li>
+      <li>หักหลังโปรโมชั่นตามจำนวนผู้ร้อง และก่อนหักส่วนลด VIP</li>
+      <li>การแสดงปุ่มหรือการทดลองในหน้าคำนวณไม่ถือเป็นการยืนยันสิทธิ์ ต้องตรวจสอบวัน เวลา และเงื่อนไขกับร้าน</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>6. ส่วนลด VIP</h2>
+    <table>
+      <thead><tr><th>ประเภทงาน</th><th>ฐานส่วนลด</th><th>ข้อจำกัด</th></tr></thead>
+      <tbody>
+        <tr><td>เพลงคัฟเวอร์</td><td>ลด 50% เฉพาะยอด Edit &amp; Mix เสียงร้องที่เข้าเงื่อนไข ไม่ใช่ยอดบริการทั้งหมด</td><td>หากลูกค้า VIP ร้องในโปรเจกต์ ให้คิดส่วนลดเฉพาะยอดของลูกค้า VIP คนนั้น; หากลูกค้า VIP ไม่ได้ร้องและใช้นักร้องที่ไม่ใช่ VIP ใช้ได้กับยอด Mix ไม่เกิน 3 คน และไม่ใช้ส่วนลด VIP เมื่อมีนักร้องตั้งแต่ 4 คนขึ้นไป</td></tr>
+        <tr><td>เพลงแต่ง</td><td>ลด 50% จากยอดบริการเพลงแต่งทั้งหมดหลังค่าบริการและส่วนลดรายการอื่น รวม Part ดนตรี</td><td>ไม่รวมค่าจ้างนักร้องรับจ้าง</td></tr>
+      </tbody>
+    </table>
+    <p>ส่วนลด VIP คำนวณเป็นขั้นสุดท้ายหลังส่วนลดโปรโมชั่นอื่นแล้ว กรณีเพลงคัฟเวอร์ หากมีโปรโมชั่นก่อนหน้า ยอด Mix ที่เข้าเงื่อนไขจะปรับตามสัดส่วนส่วนลดก่อนหน้าแล้วจึงคิด 50% ส่วนลด Cover ไม่ครอบคลุมบริการดนตรี ไกด์ Harmony หรือค่าบริการอื่น</p>
+    <p><strong>หมายเหตุเรื่องสิทธิ์:</strong> ปุ่มทดลอง VIP ในเครื่องคำนวณมีไว้จำลองยอดเท่านั้น ไม่ได้ตรวจสอบสถานะหรือข้อยกเว้นของลูกค้า ร้านเป็นผู้ยืนยันการใช้สิทธิ์จริงก่อนออกใบเสนอราคา</p>
+  </section>
+
+  <section class="section">
+    <h2>7. ตัวอย่างการคำนวณแบบเปิดเผย</h2>
+    <article class="example">
+      <h3>ตัวอย่าง A — เพลงคัฟเวอร์</h3>
+      <p>สมมติ 120 คำ, ผู้ร้อง 2 คน (หนึ่งคนเป็นลูกค้า VIP), เลือก Instrument 100 บาท, Vocal Melody Guide 600 บาท และ Harmony/แอดลิบมีทำนอง 700 บาท; ไม่มี Commercial หรืองานเร่ง และใช้โปรโมชั่น 11.11</p>
+      <table>
+        <tbody>
+          <tr><td>Edit &amp; Mix: 120 × 3.50 × 2</td><td class="amount">840.00</td></tr>
+          <tr><td>บริการเสริม: 100 + 600 + 700</td><td class="amount">1,400.00</td></tr>
+          <tr><td>ยอดบริการตั้งต้น</td><td class="amount">2,240.00</td></tr>
+          <tr><td>Service charge Cover 20%: 2,240 × 20%</td><td class="amount">+448.00</td></tr>
+          <tr><td>ยอดก่อนโปรโมชั่น</td><td class="amount">2,688.00</td></tr>
+          <tr><td>โปรโมชั่นผู้ร้องคู่ 10%: 2,688 × 10% (ปัดเป็นบาท)</td><td class="amount">−269.00</td></tr>
+          <tr><td>ยอดหลังโปรโมชั่นผู้ร้องคู่</td><td class="amount">2,419.00</td></tr>
+          <tr><td>11.11 20%: 2,419 × 20% (ปัดเป็นบาท)</td><td class="amount">−484.00</td></tr>
+          <tr><td>ยอดหลัง 11.11</td><td class="amount">1,935.00</td></tr>
+          <tr><td>ส่วนลด VIP: 50% ของ Mix ลูกค้า VIP (420 × 90% × 80% = 302.40; ปัดเป็นบาท)</td><td class="amount">−302.00</td></tr>
+          <tr class="total-row"><td>ยอดประมาณการ</td><td class="amount">1,633.00 บาท</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">ตัวอย่างนี้สมมติว่าร้านยืนยันสิทธิ์ VIP ของผู้ร้องหนึ่งคน และอนุมัติการใช้ 11.11 ในวันที่กำหนด</p>
+    </article>
+    <article class="example">
+      <h3>ตัวอย่าง B — เพลงแต่ง</h3>
+      <p>สมมติเลือกแต่งเนื้อเพลง 1,500 บาท, แต่งทำนอง 1,500 บาท, ผลิตดนตรี 4,000 บาท, Vocal Melody Guide 600 บาท, Harmony/แอดลิบ 700 บาท; จำนวน 100 คำและผู้ร้อง 4 คน; ไม่มี Commercial หรืองานเร่ง และใช้ 11.11 กับ VIP</p>
+      <table>
+        <tbody>
+          <tr><td>เนื้อเพลง + ทำนอง + ดนตรี + Guide + Harmony</td><td class="amount">8,300.00</td></tr>
+          <tr><td>Edit &amp; Mix: 100 × 3.50 × 4</td><td class="amount">1,400.00</td></tr>
+          <tr><td>ยอดบริการตั้งต้น</td><td class="amount">9,700.00</td></tr>
+          <tr><td>Service charge เพลงแต่ง 30%: 9,700 × 30%</td><td class="amount">+2,910.00</td></tr>
+          <tr><td>ยอดก่อนโปรโมชั่น</td><td class="amount">12,610.00</td></tr>
+          <tr><td>โปรโมชั่นผู้ร้อง 4 คน 15%: 12,610 × 15% (ปัดเป็นบาท)</td><td class="amount">−1,892.00</td></tr>
+          <tr><td>ยอดหลังโปรโมชั่นผู้ร้อง</td><td class="amount">10,718.00</td></tr>
+          <tr><td>11.11 20%: 10,718 × 20% (ปัดเป็นบาท)</td><td class="amount">−2,144.00</td></tr>
+          <tr><td>ยอดหลัง 11.11</td><td class="amount">8,574.00</td></tr>
+          <tr><td>ส่วนลด VIP 50% จากยอดบริการเพลงแต่ง (ไม่รวมค่าจ้างนักร้องรับจ้าง)</td><td class="amount">−4,287.00</td></tr>
+          <tr class="total-row"><td>ยอดประมาณการ</td><td class="amount">4,287.00 บาท</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section class="section page-four">
+    <h2>8. หลักการปัดเศษและรายการที่อยู่นอกยอดระบบ</h2>
+    <ul>
+      <li>จำนวน Edit &amp; Mix คิดจากจำนวนคำ × 3.50 บาท × ผู้ร้อง จึงอาจมีเศษ 0.50 บาท</li>
+      <li>ส่วนลดและค่าบริการที่เป็นเปอร์เซ็นต์ปัดเป็นจำนวนเต็มบาทในแต่ละขั้น โดยเศษตั้งแต่ 0.50 บาทปัดขึ้น ก่อนนำยอดไปคำนวณขั้นถัดไป</li>
+      <li>มาสเตอริงและบริการแปลเพลงเป็นรายการประเมินแยก ไม่รวมในยอดจากเครื่องคำนวณหลัก เว้นแต่ระบุไว้ในใบเสนอราคา</li>
+      <li>ค่าจ้างนักร้องรับจ้างคิดตามอัตราของนักร้องแต่ละท่านและยืนยันแยกต่างหาก โดยไม่รวมในส่วนลด VIP เพลงแต่ง</li>
+      <li>งานเร่งพิเศษขึ้นอยู่กับคิวและการยืนยันของร้าน; การใช้เชิงพาณิชย์ต้องแจ้งรูปแบบการใช้งาน</li>
+      <li>โปรโมชั่นอื่นหรือสิทธิ์ที่ไม่ได้ระบุในเอกสารนี้ ต้องตรวจสอบกับร้านก่อนใช้ร่วมกัน</li>
+    </ul>
+  </section>
+
+  <section class="section worksheet">
+    <h2>9. แบบฟอร์มสรุปเพื่อขอประเมินราคา</h2>
+    <table class="worksheet-table">
+      <thead><tr><th>รายการ</th><th>ข้อมูล / รายละเอียด</th></tr></thead>
+      <tbody>
+        <tr><td>ประเภทงาน / จำนวนคำ / จำนวนผู้ร้อง</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>บริการหลักและบริการเสริมที่เลือก</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>ยอดบริการตั้งต้น</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>Service charge (อัตรา / จำนวนเงิน)</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>Commercial / งานเร่ง (ถ้ามี)</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>โปรโมชั่นตามจำนวนผู้ร้อง (อัตรา / ส่วนลด)</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>โปรโมชั่น 11.11 (ถ้าใช้ได้)</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>ส่วนลด VIP (สิทธิ์ที่ร้านยืนยัน)</td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td><strong>ยอดประมาณการก่อนยืนยันใบเสนอราคา</strong></td><td class="worksheet-blank">&nbsp;</td></tr>
+        <tr><td>หมายเหตุ / วันที่ยืนยันราคา</td><td class="worksheet-blank">&nbsp;</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <p class="footer-note">Muecity · เอกสารอธิบายหลักเกณฑ์คำนวณเพื่อประกอบการพิจารณาของลูกค้า · สอบถามเพิ่มเติม: muecity66.nm@gmail.com · X: @muecity · Discord: disnummue · ราคาและเงื่อนไขสุดท้ายให้ยืนยันกับทางร้านก่อนเริ่มงาน</p>
+</body>
+</html>
